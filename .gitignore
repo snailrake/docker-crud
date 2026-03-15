@@ -1,0 +1,13 @@
+.idea/
+.vscode/
+.gradle/
+.mvn/
+.m2/
+app/target/
+app/.flattened-pom.xml
+*.iml
+*.log
+.DS_Store
+Thumbs.db
+.env
+compose.override.yml
