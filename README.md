@@ -126,6 +126,8 @@ curl -X DELETE http://localhost:8080/api/tasks/1
 
 Pipeline запускается при открытии и обновлении pull request, а также при push в `main`.
 
+Для проверки можно открыть отдельный pull request и посмотреть выполнение job во вкладке GitHub Actions.
+
 В pipeline есть отдельные job:
 
 - `build` - проверяет, что приложение собирается
