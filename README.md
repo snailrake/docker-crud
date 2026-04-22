@@ -8,10 +8,13 @@
 
 - `app` - Spring Boot приложение
 - `app/src/main/java` - основной код приложения
+- `app/src/test/java` - unit и web-тесты
 - `app/src/main/resources/application.yml` - настройки Spring Boot
+- `app/checkstyle.xml` - конфиг линтера
 - `app/Dockerfile` - Dockerfile для приложения
 - `db/init.sql` - создание таблицы и стартовые данные
 - `db/Dockerfile` - Dockerfile для PostgreSQL
+- `.github/workflows/ci-cd.yml` - pipeline для GitHub Actions
 - `docker-compose.yml` - запуск контейнеров
 - `app.env` - переменные окружения для приложения
 - `db.env` - переменные окружения для базы данных
@@ -25,6 +28,10 @@
 - удаление задачи
 - фильтрация и сортировка задач
 - инициализация базы через SQL-скрипт
+- unit и web-тесты
+- линтер
+- coverage с порогом 50%
+- CI/CD pipeline для GitHub Actions
 
 ## Запуск
 
@@ -50,20 +57,36 @@ docker compose down
 docker compose down -v
 ```
 
-## Если нужно собрать jar вручную
+## Локальная проверка
+
+Сборка:
 
 ```powershell
 cd app
-mvn clean package
+mvn clean package -DskipTests
 ```
 
-Jar-файл появится в папке:
+Линтер:
+
+```powershell
+cd app
+mvn checkstyle:check
+```
+
+Тесты и coverage:
+
+```powershell
+cd app
+mvn clean verify
+```
+
+HTML-отчет coverage после проверки будет лежать в папке:
 
 ```text
-app/target
+app/target/site/jacoco
 ```
 
-## Проверка
+## Проверка API
 
 Получить все задачи:
 
@@ -90,7 +113,7 @@ curl -X POST http://localhost:8080/api/tasks ^
 ```powershell
 curl -X PUT http://localhost:8080/api/tasks/1 ^
 -H "Content-Type: application/json" ^
--d "{\"title\":\"Finish docker lab\",\"description\":\"Project is ready\",\"priority\":\"HIGH\",\"status\":\"DONE\",\"dueDate\":\"2026-03-20\"}"
+-d "{\"title\":\"Project is ready\",\"description\":\"Update task status\",\"priority\":\"HIGH\",\"status\":\"DONE\",\"dueDate\":\"2026-03-20\"}"
 ```
 
 Удалить задачу:
@@ -98,3 +121,25 @@ curl -X PUT http://localhost:8080/api/tasks/1 ^
 ```powershell
 curl -X DELETE http://localhost:8080/api/tasks/1
 ```
+
+## CI/CD
+
+Pipeline запускается при открытии и обновлении pull request, а также при push в `main`.
+
+В pipeline есть отдельные job:
+
+- `build` - проверяет, что приложение собирается
+- `lint` - запускает checkstyle
+- `test` - запускает тесты и проверку coverage
+- `docker_build` - собирает Docker-образ приложения
+- `docker_push` - отправляет образ в Docker Hub после успешных предыдущих шагов
+
+В `docker_push` используются секреты GitHub Actions:
+
+- `DOCKERHUB_USERNAME`
+- `DOCKERHUB_TOKEN`
+
+Образ публикуется с тегами:
+
+- `sha-<short_commit_sha>`
+- `latest`
