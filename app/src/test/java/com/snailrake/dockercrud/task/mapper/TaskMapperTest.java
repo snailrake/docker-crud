@@ -5,6 +5,7 @@ import com.snailrake.dockercrud.task.model.Priority;
 import com.snailrake.dockercrud.task.model.Task;
 import com.snailrake.dockercrud.task.model.TaskStatus;
 import org.junit.jupiter.api.Test;
+import java.util.UUID;
 
 import java.time.LocalDate;
 import java.time.OffsetDateTime;
